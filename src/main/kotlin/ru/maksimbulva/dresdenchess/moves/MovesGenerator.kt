@@ -12,7 +12,7 @@ object MovesGenerator {
     fun generateMoves(position: Position): List<Int> {
         val semiLegalMoves = generateSemiLegalMoves(position)
         // TODO - remove me
-//        val strs = semiLegalMoves.map { Cell.toString(Move.fromCell(it)) + "-" + Cell.toString(Move.destCell(it)) }
+        val strs = semiLegalMoves.map { Cell.toString(Move.fromCell(it)) + "-" + Cell.toString(Move.destCell(it)) }
         // TODO - consider returning a sequence
         return semiLegalMoves.filter { move ->
             position.playMove(move)
@@ -26,13 +26,15 @@ object MovesGenerator {
     fun countPossibleMoves(position: Position, depthPly: Int): Long {
         if (depthPly == 0) return 0
         val moves = MovesGenerator.generateMoves(position)
-        var movesCounter = moves.size.toLong()
+        var movesCounter: Long = 0
         if (depthPly > 1) {
             for (move in moves) {
                 position.playMove(move)
                 movesCounter += countPossibleMoves(position, depthPly - 1)
                 position.undoMove()
             }
+        } else {
+            movesCounter = moves.size.toLong()
         }
         return movesCounter
     }

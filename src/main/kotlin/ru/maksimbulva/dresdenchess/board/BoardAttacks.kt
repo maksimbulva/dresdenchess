@@ -8,11 +8,7 @@ fun Board.isCellAttacked(targetCell: Int, attacker: Int): Boolean {
 
 fun Board.isCellAttacked(targetCell: Int, attacker: PiecesLinkedList.Node): Boolean {
     val attackerCell = attacker.cell
-    return if (attacker.piece.isJumper) {
-        attacker.piece.isAttacksCell(targetCell, attackerCell, this)
-    } else {
-        throw NotImplementedError()
-    }
+    return attacker.piece.isAttacksCell(targetCell, attackerCell, this)
 }
 
 fun Board.isCellBecameAttacked(targetCell: Int, cellBecameEmpty: Int): Boolean {

@@ -13,13 +13,19 @@ fun createInitialPosition(): Position {
     val board = result.board
     for (column in Columns.COLUMN_A..Columns.COLUMN_H) {
         board.addPiece(Players.WHITE, WhitePawn, Cell.encode(Rows.ROW_2, column))
+        board.addPiece(Players.BLACK, BlackPawn, Cell.encode(Rows.ROW_7, column))
     }
-    board.addPiece(Players.WHITE, Rook, Cells.A1)
-    board.addPiece(Players.WHITE, Knight, Cells.B1)
-    board.addPiece(Players.WHITE, Bishop, Cells.C1)
-    board.addPiece(Players.WHITE, Queen, Cells.D1)
-    board.addPiece(Players.WHITE, Bishop, Cells.F1)
-    board.addPiece(Players.WHITE, Knight, Cells.G1)
-    board.addPiece(Players.WHITE, Rook, Cells.H1)
+    for ((column, piece) in listOf(
+        Columns.COLUMN_A to Rook,
+        Columns.COLUMN_B to Knight,
+        Columns.COLUMN_C to Bishop,
+        Columns.COLUMN_D to Queen,
+        Columns.COLUMN_F to Bishop,
+        Columns.COLUMN_G to Knight,
+        Columns.COLUMN_H to Rook
+    )) {
+        board.addPiece(Players.WHITE, piece, Cell.encode(Rows.ROW_1, column))
+        board.addPiece(Players.BLACK, piece, Cell.encode(Rows.ROW_8, column))
+    }
     return result
 }
