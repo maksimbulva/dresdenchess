@@ -8,7 +8,7 @@ object MoveTableGenerator {
 
     fun generateTable(directions: Array<Pair<Int, Int>>): Array<IntArray> {
         val result = Array(size = 64) { IntArray(0) }
-        val generatedArrays = listOf<IntArray>()
+        val generatedArrays = mutableListOf<IntArray>()
 
         for (row in Rows.ROW_1..Rows.ROW_8) {
             for (column in Columns.COLUMN_A..Columns.COLUMN_H) {
@@ -21,8 +21,13 @@ object MoveTableGenerator {
                         .toList()
                         .toIntArray()
 
-                result[departureCell] = generatedArrays.firstOrNull { it.contentEquals(directionsAtCell) }
-                        ?: directionsAtCell
+                val arrayToReuse = generatedArrays.firstOrNull { it.contentEquals(directionsAtCell) }
+                if (arrayToReuse == null) {
+                    result[departureCell] = directionsAtCell
+                    generatedArrays.add(directionsAtCell)
+                } else {
+                    result[departureCell] = arrayToReuse
+                }
             }
         }
 

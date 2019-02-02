@@ -1,6 +1,5 @@
 package ru.maksimbulva.dresdenchess.board
 
-import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.collections.PiecesLinkedList
 
 fun Board.isCellAttacked(targetCell: Int, attacker: Int): Boolean {

@@ -25,4 +25,8 @@ object Cell {
             null
         }
     }
+
+    fun toString(cell: Int): String {
+        return Columns.toString(column(cell)) + Rows.toString(row(cell))
+    }
 }

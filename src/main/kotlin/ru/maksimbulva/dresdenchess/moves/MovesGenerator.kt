@@ -3,14 +3,16 @@ package ru.maksimbulva.dresdenchess.moves
 import org.jetbrains.annotations.TestOnly
 import ru.maksimbulva.dresdenchess.Move
 import ru.maksimbulva.dresdenchess.Pieces
+import ru.maksimbulva.dresdenchess.board.Cell
 import ru.maksimbulva.dresdenchess.board.isCellAttacked
 import ru.maksimbulva.dresdenchess.board.isCellBecameAttacked
-import ru.maksimbulva.dresdenchess.collections.PiecesLinkedList
 import ru.maksimbulva.dresdenchess.position.Position
 
 object MovesGenerator {
     fun generateMoves(position: Position): List<Int> {
         val semiLegalMoves = generateSemiLegalMoves(position)
+        // TODO - remove me
+//        val strs = semiLegalMoves.map { Cell.toString(Move.fromCell(it)) + "-" + Cell.toString(Move.destCell(it)) }
         // TODO - consider returning a sequence
         return semiLegalMoves.filter { move ->
             position.playMove(move)
@@ -22,9 +24,10 @@ object MovesGenerator {
 
     @TestOnly
     fun countPossibleMoves(position: Position, depthPly: Int): Long {
+        if (depthPly == 0) return 0
         val moves = MovesGenerator.generateMoves(position)
         var movesCounter = moves.size.toLong()
-        if (depthPly > 0) {
+        if (depthPly > 1) {
             for (move in moves) {
                 position.playMove(move)
                 movesCounter += countPossibleMoves(position, depthPly - 1)
