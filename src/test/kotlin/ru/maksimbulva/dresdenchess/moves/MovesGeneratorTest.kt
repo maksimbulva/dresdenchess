@@ -10,7 +10,8 @@ internal class MovesGeneratorTest {
     fun `move count from initial position is correct`() {
         for ((depthPly, moveCount) in listOf(
             1 to 20L,
-            2 to 400L
+            2 to 400L,
+            3 to 8902L
         )) {
             val position = createInitialPosition()
             assertEquals(moveCount, MovesGenerator.countPossibleMoves(position, depthPly))

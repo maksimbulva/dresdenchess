@@ -4,12 +4,19 @@ import ru.maksimbulva.dresdenchess.pieces.IPiece
 
 class PiecesLinkedList : Iterable<PiecesLinkedList.Node> {
     class Node(
-            var player: Int,
-            var piece: IPiece,
-            var cell: Int,
-            var prev: Node?,
-            var next: Node?
-    )
+        var player: Int,
+        var piece: IPiece,
+        var cell: Int,
+        var prev: Node?,
+        var next: Node?
+    ) {
+        fun removeFromList() {
+            prev?.let { it.next = next }
+            next?.let { it.prev = prev }
+            prev = null
+            next = null
+        }
+    }
 
     class Iterator(private var nextNode: Node?) : kotlin.collections.Iterator<Node> {
         override operator fun hasNext() = nextNode != null

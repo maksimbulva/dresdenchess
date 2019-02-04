@@ -14,8 +14,11 @@ abstract class PieceJumper : IPiece {
         val board = position.board
         for (moveDir in moveDirTable[fromCell]) {
             val destCell = fromCell + moveDir
-            if (board.isNotOccupiedBy(playerToMove, destCell)) {
+            val boardNode = board.lookupCell(destCell)
+            if (boardNode == null) {
                 moves.add(Move.encode(piece, fromCell, destCell))
+            } else if (boardNode.player != playerToMove) {
+                moves.add(Move.encodeCapture(piece, fromCell, destCell, boardNode.piece.piece))
             }
         }
     }

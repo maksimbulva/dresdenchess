@@ -32,6 +32,8 @@ class Board(
         }
     }
 
+    fun lookupCell(cell: Int) = cells[cell]
+
     fun isEmpty(cell: Int) = cells[cell] == null
 
     fun isNotOccupiedBy(player: Int, cell: Int): Boolean {
@@ -44,11 +46,15 @@ class Board(
     }
 
     fun updatePieceCell(fromCell: Int, toCell: Int) {
-        val node = cells[fromCell]
-                ?: throw IllegalStateException()
+        val node = cells[fromCell] ?: throw IllegalStateException()
         node.cell = toCell
         cells[fromCell] = null
         cells[toCell] = node
+    }
+
+    fun removePieceAt(cell: Int) {
+        val node = cells[cell] ?: throw IllegalStateException()
+        node.removeFromList()
     }
 
     fun addPiece(player: Int, piece: IPiece, cell: Int) {

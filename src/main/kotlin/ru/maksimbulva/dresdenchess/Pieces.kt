@@ -1,5 +1,7 @@
 package ru.maksimbulva.dresdenchess
 
+import ru.maksimbulva.dresdenchess.pieces.*
+
 object Pieces {
     const val NONE = 0
     const val PAWN = 1
@@ -10,4 +12,16 @@ object Pieces {
     const val KING = 6
 
     const val MASK = 7
+
+    fun instance(piece: Int, player: Int): IPiece {
+        return when (piece) {
+            PAWN -> if (player == Players.WHITE) WhitePawn else BlackPawn
+            KNIGHT -> Knight
+            BISHOP -> Bishop
+            ROOK -> Rook
+            QUEEN -> Queen
+            KING -> King
+            else -> throw IllegalStateException()
+        }
+    }
 }
