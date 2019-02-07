@@ -12,6 +12,9 @@ object Cells {
     const val A2 = 8
     const val B2 = 9
     const val C2 = 10
+    const val A3 = 16
+    const val B3 = 17
+    const val C3 = 18
     const val E8 = (Rows.ROW_8 shl 3) + Columns.COLUMN_E
     const val A8 = 56
     const val B8 = 57

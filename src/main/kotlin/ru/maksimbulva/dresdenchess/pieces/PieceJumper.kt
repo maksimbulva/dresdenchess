@@ -4,8 +4,7 @@ import ru.maksimbulva.dresdenchess.Move
 import ru.maksimbulva.dresdenchess.board.Board
 import ru.maksimbulva.dresdenchess.position.Position
 
-abstract class PieceJumper : IPiece {
-    protected abstract val moveDirTable: Array<IntArray>
+abstract class PieceJumper(private val moveDirTable: Array<IntArray>) : IPiece {
 
     override val isJumper = true
 
