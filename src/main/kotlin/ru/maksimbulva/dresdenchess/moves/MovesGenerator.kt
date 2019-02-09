@@ -3,9 +3,11 @@ package ru.maksimbulva.dresdenchess.moves
 import org.jetbrains.annotations.TestOnly
 import ru.maksimbulva.dresdenchess.Move
 import ru.maksimbulva.dresdenchess.Pieces
+import ru.maksimbulva.dresdenchess.Players
 import ru.maksimbulva.dresdenchess.board.Cell
 import ru.maksimbulva.dresdenchess.board.isCellAttacked
 import ru.maksimbulva.dresdenchess.board.isCellBecameAttacked
+import ru.maksimbulva.dresdenchess.otherPlayer
 import ru.maksimbulva.dresdenchess.position.Position
 
 object MovesGenerator {
@@ -52,14 +54,8 @@ object MovesGenerator {
 
     private fun isValidPosition(position: Position, prevMove: Int): Boolean {
         val board = position.board
-        val pieceMoved = Move.piece(prevMove)
-        val prevMoveDest = Move.destCell(prevMove)
-        return if (pieceMoved == Pieces.KING) {
-            !board.isCellAttacked(prevMoveDest, position.playerToMove)
-        } else {
-            val kingCell = board.kingCell(position.otherPlayer)
-            val prevMoveFrom = Move.fromCell(prevMove)
-            !board.isCellBecameAttacked(kingCell, prevMoveFrom)
-        }
+        val kingCell = position.board.kingCell(position.otherPlayer)
+        // TODO - optimize me, use isCellBecameAttacked() when sufficient
+        return !board.isCellAttacked(kingCell, position.playerToMove)
     }
 }

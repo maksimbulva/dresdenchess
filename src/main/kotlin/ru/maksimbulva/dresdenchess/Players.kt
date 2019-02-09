@@ -6,3 +6,6 @@ object Players {
 
     const val MASK = BLACK or WHITE
 }
+
+// Implementation is based on a fact that Players.WHITE is zero
+fun otherPlayer(player: Int) = Players.BLACK - player
