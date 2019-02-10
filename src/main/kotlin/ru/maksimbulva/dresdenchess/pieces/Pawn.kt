@@ -1,18 +1,22 @@
 package ru.maksimbulva.dresdenchess.pieces
 
-import ru.maksimbulva.dresdenchess.Move
 import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.board.Board
 import ru.maksimbulva.dresdenchess.board.Cell
 import ru.maksimbulva.dresdenchess.board.Columns
 import ru.maksimbulva.dresdenchess.position.Position
 
-abstract class Pawn(val moveRowDelta: Int, val doubleStepMoveRow: Int) : IPiece {
+abstract class Pawn(
+    val moveRowDelta: Int,
+    val doubleStepMoveRow: Int,
+    val enPassantCaptureRow: Int
+) : IPiece {
+
     override val piece = Pieces.PAWN
 
     override val isJumper = true
 
-    // TODO - consider promotions and en passant captures
+    // TODO - consider promotions
     override fun generateSemiLegalMoves(
         position: Position,
         fromCell: Int,
@@ -41,6 +45,14 @@ abstract class Pawn(val moveRowDelta: Int, val doubleStepMoveRow: Int) : IPiece 
         if (fromColumn < Columns.COLUMN_H) {
             val destCell = Cell.encode(fromRow + moveRowDelta, fromColumn + 1)
             generateCapture(position, fromCell, destCell, moves)
+        }
+
+        if (fromRow == enPassantCaptureRow && position.isCanCaptureEnPassant) {
+            val enPassantCaptureColumn = position.enPassantCaptureColumn
+            if (Math.abs(enPassantCaptureColumn - fromColumn) == 1) {
+                val destCell = Cell.encode(fromRow + moveRowDelta, enPassantCaptureColumn)
+                moves.add(Move.encodeEnPassantCapture(fromCell, destCell))
+            }
         }
     }
 

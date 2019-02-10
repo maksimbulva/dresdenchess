@@ -2,7 +2,6 @@ package ru.maksimbulva.dresdenchess.board
 
 import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.Players
-import ru.maksimbulva.dresdenchess.otherPlayer
 
 fun Board.isCellAttacked(targetCell: Int, attacker: Int): Boolean {
     // Consider using array here if it does not hurt the performance
@@ -90,8 +89,7 @@ fun Board.isCellAttacked(targetCell: Int, attacker: Int): Boolean {
 }
 
 fun Board.isCellBecameAttacked(targetCell: Int, cellBecameEmpty: Int): Boolean {
-    // TODO - implement me
-    return false
+    TODO("Not implemented")
 }
 
 private fun isAttackedFromDir(

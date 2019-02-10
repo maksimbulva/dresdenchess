@@ -47,6 +47,7 @@ class Board(
 
     fun updatePieceCell(fromCell: Int, toCell: Int) {
         val node = cells[fromCell] ?: throw IllegalStateException()
+        assert(cells[toCell] == null)
         node.cell = toCell
         cells[fromCell] = null
         cells[toCell] = node
@@ -55,6 +56,7 @@ class Board(
     fun removePieceAt(cell: Int) {
         val node = cells[cell] ?: throw IllegalStateException()
         node.removeFromList()
+        cells[cell] = null
     }
 
     fun addPiece(player: Int, piece: IPiece, cell: Int) {

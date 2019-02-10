@@ -12,6 +12,7 @@ object Cells {
     const val A2 = 8
     const val B2 = 9
     const val C2 = 10
+    const val D2 = 11
     const val A3 = 16
     const val B3 = 17
     const val C3 = 18
