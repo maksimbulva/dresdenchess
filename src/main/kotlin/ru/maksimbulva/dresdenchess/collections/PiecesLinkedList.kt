@@ -1,5 +1,6 @@
 package ru.maksimbulva.dresdenchess.collections
 
+import ru.maksimbulva.dresdenchess.board.Cell
 import ru.maksimbulva.dresdenchess.pieces.IPiece
 
 class PiecesLinkedList : Iterable<PiecesLinkedList.Node> {
@@ -15,6 +16,10 @@ class PiecesLinkedList : Iterable<PiecesLinkedList.Node> {
             next?.let { it.prev = prev }
             prev = null
             next = null
+        }
+
+        override fun toString(): String {
+            return "$player ${piece.javaClass} at ${Cell.toString(cell)}"
         }
     }
 

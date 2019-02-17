@@ -1,9 +1,9 @@
 package ru.maksimbulva.dresdenchess.pieces
 
-import ru.maksimbulva.dresdenchess.Move
 import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.board.Board
 import ru.maksimbulva.dresdenchess.board.Direction
+import ru.maksimbulva.dresdenchess.moves.Move
 import ru.maksimbulva.dresdenchess.position.Position
 
 abstract class PieceLineAttacker(private val directions: Array<Direction>) : IPiece {

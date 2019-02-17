@@ -4,6 +4,7 @@ import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.board.Board
 import ru.maksimbulva.dresdenchess.board.Cell
 import ru.maksimbulva.dresdenchess.board.Columns
+import ru.maksimbulva.dresdenchess.moves.Move
 import ru.maksimbulva.dresdenchess.position.Position
 
 abstract class Pawn(

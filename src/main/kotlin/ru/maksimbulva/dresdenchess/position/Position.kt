@@ -4,6 +4,7 @@ import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.Players
 import ru.maksimbulva.dresdenchess.board.Board
 import ru.maksimbulva.dresdenchess.board.Cell
+import ru.maksimbulva.dresdenchess.moves.Move
 import java.util.*
 
 class Position(whiteKingCell: Int, blackKingCell: Int) {

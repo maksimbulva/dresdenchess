@@ -1,7 +1,7 @@
 package ru.maksimbulva.dresdenchess.pieces
 
-import ru.maksimbulva.dresdenchess.Move
 import ru.maksimbulva.dresdenchess.board.Board
+import ru.maksimbulva.dresdenchess.moves.Move
 import ru.maksimbulva.dresdenchess.position.Position
 
 abstract class PieceJumper(private val moveDirTable: Array<IntArray>) : IPiece {

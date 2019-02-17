@@ -4,62 +4,38 @@ import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.Players
 
 fun Board.isCellAttacked(targetCell: Int, attacker: Int): Boolean {
-    // Consider using array here if it does not hurt the performance
-    var checkDirDownLeft = false
-    var checkDirDown = false
-    var checkDirDownRight = false
-    var checkDirLeft = false
-    var checkDirRight = false
-    var checkDirUpLeft = false
-    var checkDirUp = false
-    var checkDirUpRight = false
-
-    val targetRow = Cell.row(targetCell)
-    val targetColumn = Cell.column(targetCell)
+    val directionsToCheck = BooleanArray(size = 8)
 
     val attackerPieces = pieces(attacker)
-    val isAttacked = attackerPieces.any {
-        val row = Cell.row(it.cell)
-        val column = Cell.column(it.cell)
-        val piece = it.piece.piece
+    val isAttacked = attackerPieces.any { pieceNode ->
+        val vec = Vector2d.fromCells(targetCell, pieceNode.cell)
+        val piece = pieceNode.piece.piece
 
         if (piece == Pieces.BISHOP || piece == Pieces.QUEEN) {
-            if (row - targetRow == column - targetColumn) {
-                checkDirUpRight = checkDirUpRight || (row > targetRow)
-                checkDirDownLeft = checkDirDownLeft || (row < targetRow)
-            } else if (row - targetRow == targetColumn - column) {
-                checkDirUpLeft = checkDirUpLeft || (row > targetRow)
-                checkDirDownRight = checkDirDownRight || (row < targetRow)
-            }
+            vec.toBishopDirection()?.let { directionsToCheck[it.id] = true }
         }
 
         if (piece == Pieces.ROOK || piece == Pieces.QUEEN) {
-            if (row == targetRow) {
-                checkDirUp = checkDirUp || (row > targetRow)
-                checkDirDown = checkDirDown || (row < targetRow)
-            } else if (column == targetColumn) {
-                checkDirLeft = checkDirLeft || (column < targetColumn)
-                checkDirRight = checkDirRight || (column > targetColumn)
-            }
+            vec.toRookDirection()?.let { directionsToCheck[it.id] = true }
         }
 
-        when (it.piece.piece) {
+        when (piece) {
 
             Pieces.PAWN -> {
-                Math.abs(column - targetColumn) == 1
-                        && ((attacker == Players.WHITE && row + 1 == targetRow)
-                        || (attacker == Players.BLACK && row - 1 == targetRow))
+                Math.abs(vec.deltaColumn) == 1
+                        && ((attacker == Players.WHITE && vec.deltaRow == -1)
+                        || (attacker == Players.BLACK && vec.deltaRow == 1))
             }
 
             Pieces.KNIGHT -> {
-                val absDeltaRow = Math.abs(row - targetRow)
-                val absDeltaColumn = Math.abs(column - targetColumn)
+                val absDeltaRow = Math.abs(vec.deltaRow)
+                val absDeltaColumn = Math.abs(vec.deltaColumn)
                 (absDeltaRow == 1 && absDeltaColumn == 2)
                         || (absDeltaRow == 2 && absDeltaColumn == 1)
             }
 
             Pieces.KING -> {
-                Math.abs(row - targetRow) <= 1 && Math.abs(column - targetColumn) <= 1
+                Math.abs(vec.deltaRow) <= 1 && Math.abs(vec.deltaColumn) <= 1
             }
 
             else -> {
@@ -69,23 +45,19 @@ fun Board.isCellAttacked(targetCell: Int, attacker: Int): Boolean {
         }
     }
 
-    return isAttacked
-        || (checkDirDownLeft
-            && isAttackedFromDir(this, targetCell, attacker, DirectionDownLeft))
-        || (checkDirDown
-            && isAttackedFromDir(this, targetCell, attacker, DirectionDown))
-        || (checkDirDownRight
-            && isAttackedFromDir(this, targetCell, attacker, DirectionDownRight))
-        || (checkDirLeft
-            && isAttackedFromDir(this, targetCell, attacker, DirectionLeft))
-        || (checkDirRight
-            && isAttackedFromDir(this, targetCell, attacker, DirectionRight))
-        || (checkDirUpLeft
-            && isAttackedFromDir(this, targetCell, attacker, DirectionUpLeft))
-        || (checkDirUp
-            && isAttackedFromDir(this, targetCell, attacker, DirectionUp))
-        || (checkDirUpRight
-            && isAttackedFromDir(this, targetCell, attacker, DirectionUpRight))
+    if (isAttacked) {
+        return true
+    }
+
+    for (i in directionsToCheck.indices) {
+        if (directionsToCheck[i] &&
+            isAttackedFromDir(this, targetCell, attacker, DIRECTIONS[i])
+        ) {
+            return true
+        }
+    }
+
+    return false
 }
 
 fun Board.isCellBecameAttacked(targetCell: Int, cellBecameEmpty: Int): Boolean {

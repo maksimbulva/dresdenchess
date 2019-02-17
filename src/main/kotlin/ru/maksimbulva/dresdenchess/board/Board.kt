@@ -1,5 +1,6 @@
 package ru.maksimbulva.dresdenchess.board
 
+import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.Players
 import ru.maksimbulva.dresdenchess.collections.PiecesLinkedList
 import ru.maksimbulva.dresdenchess.pieces.IPiece
@@ -61,6 +62,7 @@ class Board(
 
     fun addPiece(player: Int, piece: IPiece, cell: Int) {
         require(isEmpty(cell))
+        assert(piece.piece != Pieces.KING)
         cells[cell] = pieces(player).add(player, piece, cell)
     }
 }
