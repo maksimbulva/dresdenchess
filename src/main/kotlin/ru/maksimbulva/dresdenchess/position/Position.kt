@@ -12,20 +12,51 @@ class Position(whiteKingCell: Int, blackKingCell: Int) {
 
     private val movesPlayed = Stack<MovePlayed>()
 
-    private var flags: Int = 0
+    private var _flags: Int = 0
+    val flags: Int get() = _flags
+
+    var isWhiteCanCastleShort: Boolean
+        get() = PositionFlags.isWhiteCanCastleShort(flags)
+        set(value) {
+            _flags = PositionFlags.setWhiteCanCastleShort(flags, value)
+        }
+
+    var isWhiteCanCastleLong: Boolean
+        get() = PositionFlags.isWhiteCanCastleLong(flags)
+        set(value) {
+            _flags = PositionFlags.setWhiteCanCastleLong(flags, value)
+        }
+
+    var isBlackCanCastleShort: Boolean
+        get() = PositionFlags.isBlackCanCastleShort(flags)
+        set(value) {
+            _flags = PositionFlags.setBlackCanCastleShort(flags, value)
+        }
+
+    var isBlackCanCastleLong: Boolean
+        get() = PositionFlags.isBlackCanCastleLong(flags)
+        set(value) {
+            _flags = PositionFlags.setBlackCanCastleLong(flags, value)
+        }
 
     var _playerToMove = Players.WHITE
     val playerToMove get() = _playerToMove
     val otherPlayer get() = Players.BLACK - _playerToMove
 
+    private val _halfmoveClock: Int = 0
+    val halfmoveClock: Int get() = _halfmoveClock
+
+    private val _fullmoveCounter: Int = 1
+    val fullmoveCounter: Int get() = _fullmoveCounter
+
     val isCanCaptureEnPassant
-        get() = PositionFlags.isCanCaptureEnPassant(flags)
+        get() = PositionFlags.isCanCaptureEnPassant(_flags)
 
     val enPassantCaptureColumn
-        get() = PositionFlags.enPassantColumn(flags)
+        get() = PositionFlags.enPassantColumn(_flags)
 
     fun playMove(move: Int) {
-        movesPlayed.add(MovePlayed(move, flags))
+        movesPlayed.add(MovePlayed(move, _flags))
         val piece = Move.piece(move)
         val fromCell = Move.fromCell(move)
         val toCell = Move.destCell(move)
@@ -49,7 +80,7 @@ class Position(whiteKingCell: Int, blackKingCell: Int) {
             null
         }
 
-        flags = PositionFlags.setEnPassantCaptureColumn(flags, enPassantColumn)
+        _flags = PositionFlags.setEnPassantCaptureColumn(_flags, enPassantColumn)
 
         flipPlayerToMove()
     }
@@ -57,7 +88,7 @@ class Position(whiteKingCell: Int, blackKingCell: Int) {
     fun undoMove() {
         val movePlayed = movesPlayed.pop()
         undoMove(movePlayed.move)
-        flags = movePlayed.savedFlags
+        _flags = movePlayed.savedFlags
     }
 
     private fun undoMove(move: Int) {

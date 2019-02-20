@@ -1,5 +1,15 @@
 package ru.maksimbulva.dresdenchess.position
 
+import ru.maksimbulva.dresdenchess.Pieces
+import ru.maksimbulva.dresdenchess.Players
+import ru.maksimbulva.dresdenchess.board.Board
+import ru.maksimbulva.dresdenchess.board.Cell
+import ru.maksimbulva.dresdenchess.board.Columns
+import ru.maksimbulva.dresdenchess.board.Rows
+import ru.maksimbulva.dresdenchess.pieces.BlackPawn
+import ru.maksimbulva.dresdenchess.pieces.IPiece
+import ru.maksimbulva.dresdenchess.pieces.WhitePawn
+
 /**
  * Provides methods for encoding and decoding chess positions stored in Forsyth–Edwards notation
  * https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -15,8 +25,6 @@ object Fen {
     }
 
     private const val ROWS_SEPARATOR = '/'
-    private const val FEN_WHITE_TO_MOVE = 'w'
-    private const val FEN_BLACK_TO_MOVE = 'b'
     private const val FEN_NO_ONE_CAN_CASTLE = '-'
     private const val FEN_WHITE_CAN_CASTLE_SHORT = 'K'
     private const val FEN_WHITE_CAN_CASTLE_LONG = 'Q'
@@ -26,108 +34,16 @@ object Fen {
 
     const val InitialPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
-/*    public static class Fen
-    {
-
-        public static readonly string InitialPosition =
-            ;
-
-        public static string Encode(IReadOnlyPosition position,
-            EncodingOptions options = EncodingOptions.None)
-        {
-            Debug.Assert(position != null);
-            var s = new StringBuilder(80);
-            // Encode the chessboard
-            var board = Factory.Instance.CreateChessboardArray(position);
-            for (int row = Chessboard.ROW_MAX; row >= Chessboard.ROW_MIN; --row)
-            {
-                int empty_cells = 0;
-                for (int column = Chessboard.COLUMN_MIN;
-                    column <= Chessboard.COLUMN_MAX; ++column)
-                {
-                    var cur_cell = new ChessboardCell(row, column);
-                    Players player;
-                    Pieces piece;
-                    if (board.IsPieceAt(cur_cell, out player, out piece))
-                    {
-                        if (empty_cells != 0)
-                        {
-                            s.Append(empty_cells);
-                            empty_cells = 0;
-                        }
-                        s.Append(PieceToChar(player, piece));
-                    }
-                    else
-                    {
-                        ++empty_cells;
-                    }
-                }
-                if (empty_cells != 0)
-                {
-                    s.Append(empty_cells);
-                    empty_cells = 0;
-                }
-                if (row != Chessboard.ROW_MIN)
-                {
-                    s.Append(ROWS_SEPARATOR);
-                }
-            }
-
-            // Encode player to move
-            s.Append(' ');
-            s.Append(position.IsWhiteToMove ? FEN_WHITE_TO_MOVE : FEN_BLACK_TO_MOVE);
-
-            // Encode castling availability
-            s.Append(' ');
-            if (!position.IsCanCastleShort(Players.White)
-                && !position.IsCanCastleLong(Players.White)
-                && !position.IsCanCastleShort(Players.Black)
-                && !position.IsCanCastleLong(Players.Black))
-            {
-                s.Append(FEN_NO_ONE_CAN_CASTLE);
-            }
-            else
-            {
-                if (position.IsCanCastleShort(Players.White))
-                {
-                    s.Append(FEN_WHITE_CAN_CASTLE_SHORT);
-                }
-                if (position.IsCanCastleLong(Players.White))
-                {
-                    s.Append(FEN_WHITE_CAN_CASTLE_LONG);
-                }
-                if (position.IsCanCastleShort(Players.Black))
-                {
-                    s.Append(FEN_BLACK_CAN_CASTLE_SHORT);
-                }
-                if (position.IsCanCastleLong(Players.Black))
-                {
-                    s.Append(FEN_BLACK_CAN_CASTLE_LONG);
-                }
-            }
-
-            // Encode en passant caputre possibility
-            s.Append(' ');
-            int? capture_en_passant_column = position.CaptureEnPassantColumn;
-            if (capture_en_passant_column.HasValue)
-            {
-                var cell = new ChessboardCell(position.IsWhiteToMove ? 5 : 2,
-                    capture_en_passant_column.Value);
-                s.Append(cell.ToString());
-            }
-            else
-            {
-                s.Append(FEN_CANNOT_CAPTURE_EN_PASSANT);
-            }
-
-            s.Append(' ').Append(position.HalfmoveClock);
-
-            s.Append(' ').Append(options.HasFlag(EncodingOptions.SetMovesCountToOne)
-                ? 1 : position.FullmoveNumber);
-
-            return s.ToString();
-        }
-
+    fun encode(position: Position, moveCounterEncoding: MoveCounterEncoding): String {
+        val sb = StringBuilder(80)
+        encodeBoard(sb, position.board)
+        encodePlayerToMove(sb, position.playerToMove)
+        encodeCastlingAvailability(sb, position)
+        encodeEnPassantCaptureAvailability(sb, position)
+        encodeMoveCounter(sb, position, moveCounterEncoding)
+        return sb.toString()
+    }
+/*
         // TODO - add proper exception handling
         public static CreatePositionData Decode(string fen)
         {
@@ -248,66 +164,7 @@ object Fen {
                 halfmove_clock);
         }
 
-        private static char PieceToChar(Players player, Pieces piece)
-        {
-            char result;
-            switch (piece)
-            {
-                case Pieces.King:
-                    result = 'k';
-                    break;
-                case Pieces.Queen:
-                    result = 'q';
-                    break;
-                case Pieces.Rook:
-                    result = 'r';
-                    break;
-                case Pieces.Bishop:
-                    result = 'b';
-                    break;
-                case Pieces.Knight:
-                    result = 'n';
-                    break;
-                default:
-                    result = 'p';
-                    break;
-            }
-            if (player == Players.White)
-            {
-                result = char.ToUpper(result);
-            }
-            return result;
-        }
 
-        private static bool CharToPiece(char c, out Players player, out Pieces piece)
-        {
-            player = char.IsUpper(c) ? Players.White : Players.Black;
-            switch (char.ToLower(c))
-            {
-                case 'k':
-                    piece = Pieces.King;
-                    break;
-                case 'q':
-                    piece = Pieces.Queen;
-                    break;
-                case 'r':
-                    piece = Pieces.Rook;
-                    break;
-                case 'b':
-                    piece = Pieces.Bishop;
-                    break;
-                case 'n':
-                    piece = Pieces.Knight;
-                    break;
-                case 'p':
-                    piece = Pieces.Pawn;
-                    break;
-                default:
-                    piece = Pieces.NoPiece;
-                    break;
-            }
-            return piece != Pieces.NoPiece;
-        }
 
         private static readonly char[] m_fen_separators = {
             ROWS_SEPARATOR, ' ', '\t' };
@@ -315,4 +172,127 @@ object Fen {
     }
 }
      */
+
+    private fun encodeBoard(sb: StringBuilder, board: Board) {
+        for (row in Rows.ROW_8 downTo Rows.ROW_1) {
+            var emptyCellsCounter = 0
+            for (column in Columns.COLUMN_A..Columns.COLUMN_H) {
+                val node = board.lookupCell(Cell.encode(row, column))
+                if (node != null) {
+                    if (emptyCellsCounter != 0) {
+                        sb.append(emptyCellsCounter)
+                        emptyCellsCounter = 0
+                    }
+                    sb.append(pieceToChar(node.player, node.piece))
+                } else {
+                    ++emptyCellsCounter
+                }
+            }
+            if (emptyCellsCounter != 0) {
+                sb.append(emptyCellsCounter)
+            }
+            if (row != Rows.ROW_1) {
+                sb.append(ROWS_SEPARATOR)
+            }
+        }
+    }
+
+    private fun encodePlayerToMove(sb: StringBuilder, player: Int) {
+        sb.append(' ')
+        sb.append(if (player == Players.WHITE) 'w' else 'b')
+    }
+
+    private fun encodeCastlingAvailability(sb: StringBuilder, position: Position) {
+        sb.append(' ')
+        val availableCastlings = listOf(
+            position.isWhiteCanCastleShort to FEN_WHITE_CAN_CASTLE_SHORT,
+            position.isWhiteCanCastleLong to FEN_WHITE_CAN_CASTLE_LONG,
+            position.isBlackCanCastleShort to FEN_BLACK_CAN_CASTLE_SHORT,
+            position.isBlackCanCastleLong to FEN_BLACK_CAN_CASTLE_LONG
+        )
+            .filter { it.first }
+
+        if (availableCastlings.isEmpty()) {
+            sb.append(FEN_NO_ONE_CAN_CASTLE)
+        } else {
+            availableCastlings.forEach { sb.append(it.second) }
+        }
+    }
+
+    private fun encodeEnPassantCaptureAvailability(sb: StringBuilder, position: Position) {
+        val flags = position.flags
+        sb.append(' ')
+        if (PositionFlags.isCanCaptureEnPassant(flags)) {
+            val row = if (position.playerToMove == Players.WHITE) {
+                WhitePawn.enPassantCaptureRow
+            } else {
+                BlackPawn.enPassantCaptureRow
+            }
+            sb.append(Cell.toString(Cell.encode(row, PositionFlags.enPassantColumn(flags))))
+        } else {
+            sb.append(FEN_CANNOT_CAPTURE_EN_PASSANT)
+        }
+    }
+
+    private fun encodeMoveCounter(
+        sb: StringBuilder,
+        position: Position,
+        moveCounterEncoding: MoveCounterEncoding
+    ) {
+        val fullmoveCounter = if (moveCounterEncoding == MoveCounterEncoding.UseActualValue) {
+            position.fullmoveCounter
+        } else {
+            1
+        }
+        sb.append(' ').append(position.halfmoveClock).append(' ').append(fullmoveCounter)
+    }
+
+    private fun pieceToChar(player: Int, piece: IPiece): Char {
+        val char = when (piece.piece) {
+            Pieces.PAWN -> 'p'
+            Pieces.KNIGHT -> 'n'
+            Pieces.BISHOP -> 'b'
+            Pieces.ROOK -> 'r'
+            Pieces.QUEEN -> 'q'
+            Pieces.KING -> 'k'
+            else -> throw IllegalStateException()
+        }
+        return if (player == Players.WHITE) {
+            char.toUpperCase()
+        } else {
+            char
+        }
+    }
+
+    /*
+    private fun charToPiece(c: Char, out Players player, out Pieces piece)
+    {
+        player = char.IsUpper(c) ? Players.White : Players.Black;
+        switch (char.ToLower(c))
+        {
+            case 'k':
+            piece = Pieces.King;
+            break;
+            case 'q':
+            piece = Pieces.Queen;
+            break;
+            case 'r':
+            piece = Pieces.Rook;
+            break;
+            case 'b':
+            piece = Pieces.Bishop;
+            break;
+            case 'n':
+            piece = Pieces.Knight;
+            break;
+            case 'p':
+            piece = Pieces.Pawn;
+            break;
+            default:
+            piece = Pieces.NoPiece;
+            break;
+        }
+        return piece != Pieces.NoPiece;
+    }
+*/
 }
