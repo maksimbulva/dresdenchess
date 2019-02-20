@@ -13,7 +13,8 @@ internal class MovesGeneratorTest {
             2 to 400L,
             3 to 8902L,
             4 to 197_281L,
-            5 to 4_865_609L
+            5 to 4_865_609L,
+            6 to 119_060_324L
         )) {
             val position = createInitialPosition()
             assertEquals(moveCount, MovesGenerator.countPossibleMoves(position, depthPly))
