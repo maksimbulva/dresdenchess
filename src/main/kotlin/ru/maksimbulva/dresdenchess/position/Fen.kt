@@ -212,12 +212,12 @@ object Fen {
         return result
     }
 
-    private fun encodePlayerToMove(sb: StringBuilder, player: Int) {
+    private fun encodePlayerToMove(sb: StringBuilder, player: Players) {
         sb.append(' ')
         sb.append(if (player == Players.WHITE) 'w' else 'b')
     }
 
-    private fun decodePlayerToMove(encoded: String): Int {
+    private fun decodePlayerToMove(encoded: String): Players {
         // Excuse case mismatch
         return when (encoded.firstOrNull()) {
             'w' -> Players.WHITE
@@ -276,7 +276,7 @@ object Fen {
         sb.append(' ').append(position.halfmoveClock).append(' ').append(fullmoveCounter)
     }
 
-    private fun pieceToChar(player: Int, piece: IPiece): Char {
+    private fun pieceToChar(player: Players, piece: IPiece): Char {
         val char = when (piece.piece) {
             Pieces.PAWN -> 'p'
             Pieces.KNIGHT -> 'n'
@@ -293,7 +293,7 @@ object Fen {
         }
     }
 
-    private fun charToPlayerAndPiece(c: Char): Pair<Int, Int>
+    private fun charToPlayerAndPiece(c: Char): Pair<Players, Int>
     {
         val player = if (c.isUpperCase()) {
             Players.WHITE
@@ -311,5 +311,5 @@ object Fen {
         }
     }
 
-    private data class EncodedPiece(val player: Int, val piece: IPiece, val cell: Int)
+    private data class EncodedPiece(val player: Players, val piece: IPiece, val cell: Int)
 }

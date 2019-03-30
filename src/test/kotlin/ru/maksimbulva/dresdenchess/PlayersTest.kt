@@ -7,7 +7,7 @@ internal class PlayersTest {
 
     @Test
     fun otherPlayerTest() {
-        assertEquals(Players.WHITE, otherPlayer(Players.BLACK))
-        assertEquals(Players.BLACK, otherPlayer(Players.WHITE))
+        assertEquals(Players.WHITE, Players.BLACK.other())
+        assertEquals(Players.BLACK, Players.WHITE.other())
     }
 }

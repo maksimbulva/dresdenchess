@@ -25,7 +25,7 @@ class Board(
         cells[blackKingCell] = blackPieces.head
     }
 
-    fun pieces(player: Int): PiecesLinkedList {
+    fun pieces(player: Players): PiecesLinkedList {
         return if (player == Players.WHITE) {
             whitePieces
         } else {
@@ -37,12 +37,12 @@ class Board(
 
     fun isEmpty(cell: Int) = cells[cell] == null
 
-    fun isNotOccupiedBy(player: Int, cell: Int): Boolean {
+    fun isNotOccupiedBy(player: Players, cell: Int): Boolean {
         val node = cells[cell]
         return node == null || node.player != player
     }
 
-    fun kingCell(player: Int): Int {
+    fun kingCell(player: Players): Int {
         return pieces(player).head?.cell ?: throw IllegalStateException()
     }
 
@@ -60,7 +60,7 @@ class Board(
         cells[cell] = null
     }
 
-    fun addPiece(player: Int, piece: IPiece, cell: Int) {
+    fun addPiece(player: Players, piece: IPiece, cell: Int) {
         require(isEmpty(cell))
         assert(piece.piece != Pieces.KING)
         cells[cell] = pieces(player).add(player, piece, cell)

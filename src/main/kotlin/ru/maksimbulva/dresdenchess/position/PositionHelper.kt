@@ -9,7 +9,7 @@ object PositionHelper {
     fun create(
         white: List<Pair<Int, IPiece>>,
         black: List<Pair<Int, IPiece>>,
-        playerToMove: Int,
+        playerToMove: Players,
         isWhiteCanCastleShort: Boolean,
         isWhiteCanCastleLong: Boolean,
         isBlackCanCastleShort: Boolean,
@@ -38,7 +38,7 @@ object PositionHelper {
         return pieces.find { it.second.piece == Pieces.KING }!!.first
     }
 
-    private fun addPieces(board: Board, player: Int, pieces: List<Pair<Int, IPiece>>) {
+    private fun addPieces(board: Board, player: Players, pieces: List<Pair<Int, IPiece>>) {
         pieces.asSequence()
             .filter { it.second.piece != Pieces.KING }
             .forEach { (cell, piece) -> board.addPiece(player, piece, cell) }

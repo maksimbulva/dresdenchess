@@ -5,6 +5,7 @@ import ru.maksimbulva.dresdenchess.Players
 import ru.maksimbulva.dresdenchess.board.Board
 import ru.maksimbulva.dresdenchess.board.Cell
 import ru.maksimbulva.dresdenchess.moves.Move
+import ru.maksimbulva.dresdenchess.other
 import java.util.*
 
 class Position(whiteKingCell: Int, blackKingCell: Int) {
@@ -41,7 +42,7 @@ class Position(whiteKingCell: Int, blackKingCell: Int) {
 
     var _playerToMove = Players.WHITE
     val playerToMove get() = _playerToMove
-    val otherPlayer get() = Players.BLACK - _playerToMove
+    val otherPlayer get() = _playerToMove.other()
 
     private val _halfmoveClock: Int = 0
     val halfmoveClock: Int get() = _halfmoveClock

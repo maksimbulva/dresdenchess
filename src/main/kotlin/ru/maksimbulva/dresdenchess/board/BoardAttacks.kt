@@ -3,7 +3,7 @@ package ru.maksimbulva.dresdenchess.board
 import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.Players
 
-fun Board.isCellAttacked(targetCell: Int, attacker: Int): Boolean {
+fun Board.isCellAttacked(targetCell: Int, attacker: Players): Boolean {
     val directionsToCheck = BooleanArray(size = 8)
 
     val attackerPieces = pieces(attacker)
@@ -67,7 +67,7 @@ fun Board.isCellBecameAttacked(targetCell: Int, cellBecameEmpty: Int): Boolean {
 private fun isAttackedFromDir(
     board: Board,
     targetCell: Int,
-    attacker: Int,
+    attacker: Players,
     direction: Direction
 ): Boolean {
 

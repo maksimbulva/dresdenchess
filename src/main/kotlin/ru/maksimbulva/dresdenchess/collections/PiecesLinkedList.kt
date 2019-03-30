@@ -1,11 +1,12 @@
 package ru.maksimbulva.dresdenchess.collections
 
+import ru.maksimbulva.dresdenchess.Players
 import ru.maksimbulva.dresdenchess.board.Cell
 import ru.maksimbulva.dresdenchess.pieces.IPiece
 
 class PiecesLinkedList : Iterable<PiecesLinkedList.Node> {
     class Node(
-        var player: Int,
+        var player: Players,
         var piece: IPiece,
         var cell: Int,
         var prev: Node?,
@@ -40,7 +41,7 @@ class PiecesLinkedList : Iterable<PiecesLinkedList.Node> {
 
     override operator fun iterator() = Iterator(head)
 
-    fun add(player: Int, piece: IPiece, cell: Int): Node {
+    fun add(player: Players, piece: IPiece, cell: Int): Node {
         val head = head
         return if (head == null) {
             val result = Node(player, piece, cell, prev = null, next = null)

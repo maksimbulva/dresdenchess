@@ -1,11 +1,12 @@
 package ru.maksimbulva.dresdenchess
 
-object Players {
-    const val WHITE = 0
-    const val BLACK = 8
-
-    const val MASK = BLACK or WHITE
+enum class Players {
+    WHITE,
+    BLACK
 }
 
-// Implementation is based on a fact that Players.WHITE is zero
-fun otherPlayer(player: Int) = Players.BLACK - player
+fun Players.other() = if (this == Players.WHITE) {
+    Players.BLACK
+} else {
+    Players.WHITE
+}

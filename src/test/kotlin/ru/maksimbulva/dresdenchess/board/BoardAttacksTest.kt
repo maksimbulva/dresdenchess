@@ -179,7 +179,7 @@ internal class BoardAttacksTest {
 
         private fun checkCellsAttacked(
             cells: Set<Int>,
-            attacker: Int,
+            attacker: Players,
             board: Board
         ) {
             for (cell in Cells.A1..Cells.H8) {

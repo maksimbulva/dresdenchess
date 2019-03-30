@@ -13,7 +13,7 @@ object Pieces {
 
     const val MASK = 7
 
-    fun instance(piece: Int, player: Int): IPiece {
+    fun instance(piece: Int, player: Players): IPiece {
         return when (piece) {
             PAWN -> if (player == Players.WHITE) WhitePawn else BlackPawn
             KNIGHT -> Knight
