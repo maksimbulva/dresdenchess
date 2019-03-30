@@ -27,6 +27,16 @@ object Cell {
     }
 
     fun toString(cell: Int): String {
-        return Columns.toString(column(cell)) + Rows.toString(row(cell))
+        return "${Columns.toChar(column(cell))}${Rows.toChar(row(cell))}"
+    }
+
+    fun fromStringOrNull(str: String): Int? {
+        return if (str.length == 2) {
+            val column = Columns.fromChar(str[0]) ?: return null
+            val row = Rows.fromChar(str[1]) ?: return null
+            Cell.encode(row, column)
+        } else {
+            null
+        }
     }
 }

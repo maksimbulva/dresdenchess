@@ -2,6 +2,7 @@ package ru.maksimbulva.dresdenchess.position
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import ru.maksimbulva.dresdenchess.Players
 import ru.maksimbulva.dresdenchess.board.Cell
 import ru.maksimbulva.dresdenchess.board.Cells
 import ru.maksimbulva.dresdenchess.board.Columns
@@ -37,6 +38,7 @@ internal class FenEncodeTest {
             ) + (Columns.COLUMN_A..Columns.COLUMN_H).map {
                 Cell.encode(Rows.ROW_7, it) to BlackPawn
             },
+            playerToMove = Players.WHITE,
             isWhiteCanCastleShort = true,
             isWhiteCanCastleLong = true,
             isBlackCanCastleShort = true,

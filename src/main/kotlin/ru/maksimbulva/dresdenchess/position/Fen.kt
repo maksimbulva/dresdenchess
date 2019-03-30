@@ -6,6 +6,7 @@ import ru.maksimbulva.dresdenchess.board.Board
 import ru.maksimbulva.dresdenchess.board.Cell
 import ru.maksimbulva.dresdenchess.board.Columns
 import ru.maksimbulva.dresdenchess.board.Rows
+import ru.maksimbulva.dresdenchess.exceptions.InvalidPositionEncodingException
 import ru.maksimbulva.dresdenchess.pieces.BlackPawn
 import ru.maksimbulva.dresdenchess.pieces.IPiece
 import ru.maksimbulva.dresdenchess.pieces.WhitePawn
@@ -43,11 +44,47 @@ object Fen {
         encodeMoveCounter(sb, position, moveCounterEncoding)
         return sb.toString()
     }
+
+    fun decode(encoded: String): Position? {
+        try {
+            val splited = encoded.split(ROWS_SEPARATOR, ' ', '\t')
+            val pieces = decodePieces(splited)
+
+            val whitePieces = pieces.asSequence()
+                .filter { it.player == Players.WHITE }
+                .map { it.cell to it.piece }
+
+            val blackPieces = pieces.asSequence()
+                .filter { it.player == Players.BLACK }
+                .map { it.cell to it.piece }
+
+            val playerToMove = decodePlayerToMove(splited[8])
+            val castlingFlags = splited[9]
+            val enPassantCaptureColumn = decodeEnPassantCaptureColumn(splited[10])
+            // TODO: These guys are not so critical, forgive possible mistakes
+            val halfmoveClock = splited[11].toInt()
+            val fullmoveCounter = splited[12].toInt()
+            // TODO
+            return PositionHelper.create(
+                white = whitePieces.toList(),
+                black = blackPieces.toList(),
+                playerToMove = playerToMove,
+                isWhiteCanCastleShort = FEN_WHITE_CAN_CASTLE_SHORT in castlingFlags,
+                isWhiteCanCastleLong = FEN_WHITE_CAN_CASTLE_LONG in castlingFlags,
+                isBlackCanCastleShort = FEN_BLACK_CAN_CASTLE_SHORT in castlingFlags,
+                isBlackCanCastleLong = FEN_BLACK_CAN_CASTLE_LONG in castlingFlags,
+                enPassantCaptureColumn = enPassantCaptureColumn,
+                halfmoveClock = halfmoveClock,
+                fullmoveCounter = fullmoveCounter
+            )
+        } catch (e: IllegalArgumentException) {
+            throw InvalidPositionEncodingException()
+        }
+    }
 /*
         // TODO - add proper exception handling
         public static CreatePositionData Decode(string fen)
         {
-            var s = fen.Split(m_fen_separators, StringSplitOptions.RemoveEmptyEntries);
             int cur_s_index = 0;
             var pieces = new List<PiecePosition>(32);
             for (int row = Chessboard.ROW_MAX; row >= Chessboard.ROW_MIN;
@@ -84,20 +121,6 @@ object Fen {
                 }
             }
 
-            // Excuse case mismatch
-            Players player_to_move;
-            switch (char.ToLower(s[cur_s_index][0]))
-            {
-                case FEN_WHITE_TO_MOVE:
-                    player_to_move = Players.White;
-                    break;
-                case FEN_BLACK_TO_MOVE:
-                    player_to_move = Players.Black;
-                    break;
-                default:
-                    // TODO
-                    throw new Exception();
-            }
             ++cur_s_index;
 
             var s_castling = s[cur_s_index];
@@ -121,29 +144,6 @@ object Fen {
             }
             ++cur_s_index;
 
-            int? capture_en_passant_column = null;
-            var s_en_passant = s[cur_s_index];
-            if (s_en_passant.Length == 2 && char.IsLetter(s_en_passant[0])
-                && char.IsDigit(s_en_passant[1]))
-            {
-                int column = char.ToLower(s_en_passant[0]) - 'a';
-                if (column < Chessboard.COLUMN_MIN || column > Chessboard.COLUMN_MAX)
-                {
-                    // TODO
-                    throw new Exception();
-                }
-                int row = s_en_passant[1] - '0';
-                if (row < Chessboard.ROW_MIN || row > Chessboard.ROW_MAX)
-                {
-                    // TODO
-                    throw new Exception();
-                }
-                // We can check if row is ok (i.e. row == 6 if White to move),
-                // but let us forgive this
-                // We do not want to confuse user with error message when we
-                // can possibly go on
-                capture_en_passant_column = column;
-            }
 
             // These guys are not so critical, forgive possible mistakes
             ushort halfmove_clock;
@@ -163,11 +163,6 @@ object Fen {
                 black_castling_options, capture_en_passant_column, fullmove_number,
                 halfmove_clock);
         }
-
-
-
-        private static readonly char[] m_fen_separators = {
-            ROWS_SEPARATOR, ' ', '\t' };
 
     }
 }
@@ -197,9 +192,38 @@ object Fen {
         }
     }
 
+    private fun decodePieces(splited: List<String>): List<EncodedPiece> {
+        require(splited.size >= 8)
+        val result = mutableListOf<EncodedPiece>()
+        splited.take(8).forEachIndexed { index, s ->
+            var column = Columns.COLUMN_A
+            s.forEach {
+                require(column in Columns.COLUMN_A..Columns.COLUMN_H)
+                if (it.isDigit()) {
+                    column = it - '0'
+                } else {
+                    val (player, piece) = charToPlayerAndPiece(it)
+                    val row = Rows.ROW_8 - index
+                    val cell = Cell.encode(row, column)
+                    result.add(EncodedPiece(player, Pieces.instance(piece, player), cell))
+                }
+            }
+        }
+        return result
+    }
+
     private fun encodePlayerToMove(sb: StringBuilder, player: Int) {
         sb.append(' ')
         sb.append(if (player == Players.WHITE) 'w' else 'b')
+    }
+
+    private fun decodePlayerToMove(encoded: String): Int {
+        // Excuse case mismatch
+        return when (encoded.firstOrNull()) {
+            'w' -> Players.WHITE
+            'b' -> Players.BLACK
+            else -> throw InvalidPositionEncodingException()
+        }
     }
 
     private fun encodeCastlingAvailability(sb: StringBuilder, position: Position) {
@@ -234,6 +258,11 @@ object Fen {
         }
     }
 
+    private fun decodeEnPassantCaptureColumn(encoded: String): Int? {
+        val cell = Cell.fromStringOrNull(encoded) ?: return null
+        return Cell.row(cell)
+    }
+
     private fun encodeMoveCounter(
         sb: StringBuilder,
         position: Position,
@@ -264,35 +293,23 @@ object Fen {
         }
     }
 
-    /*
-    private fun charToPiece(c: Char, out Players player, out Pieces piece)
+    private fun charToPlayerAndPiece(c: Char): Pair<Int, Int>
     {
-        player = char.IsUpper(c) ? Players.White : Players.Black;
-        switch (char.ToLower(c))
-        {
-            case 'k':
-            piece = Pieces.King;
-            break;
-            case 'q':
-            piece = Pieces.Queen;
-            break;
-            case 'r':
-            piece = Pieces.Rook;
-            break;
-            case 'b':
-            piece = Pieces.Bishop;
-            break;
-            case 'n':
-            piece = Pieces.Knight;
-            break;
-            case 'p':
-            piece = Pieces.Pawn;
-            break;
-            default:
-            piece = Pieces.NoPiece;
-            break;
+        val player = if (c.isUpperCase()) {
+            Players.WHITE
+        } else {
+            Players.BLACK
         }
-        return piece != Pieces.NoPiece;
+        return player to when (c.toLowerCase()) {
+            'p' -> Pieces.PAWN
+            'n' -> Pieces.KNIGHT
+            'b' -> Pieces.BISHOP
+            'r' -> Pieces.ROOK
+            'q' -> Pieces.QUEEN
+            'k' -> Pieces.KING
+            else -> throw InvalidPositionEncodingException()
+        }
     }
-*/
+
+    private data class EncodedPiece(val player: Int, val piece: IPiece, val cell: Int)
 }

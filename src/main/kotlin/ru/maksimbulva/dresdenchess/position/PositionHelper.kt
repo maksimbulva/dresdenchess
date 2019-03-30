@@ -9,6 +9,7 @@ object PositionHelper {
     fun create(
         white: List<Pair<Int, IPiece>>,
         black: List<Pair<Int, IPiece>>,
+        playerToMove: Int,
         isWhiteCanCastleShort: Boolean,
         isWhiteCanCastleLong: Boolean,
         isBlackCanCastleShort: Boolean,

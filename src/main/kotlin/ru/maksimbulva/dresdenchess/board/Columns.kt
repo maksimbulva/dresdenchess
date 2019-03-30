@@ -10,16 +10,14 @@ object Columns {
     const val COLUMN_G = 6
     const val COLUMN_H = 7
 
-    private val STRINGS = mapOf(
-        COLUMN_A to "a",
-        COLUMN_B to "b",
-        COLUMN_C to "c",
-        COLUMN_D to "d",
-        COLUMN_E to "e",
-        COLUMN_F to "f",
-        COLUMN_G to "g",
-        COLUMN_H to "h"
-    )
+    fun toChar(column: Int) = 'a' + column
 
-    fun toString(column: Int) = STRINGS.getValue(column)
+    fun fromChar(c: Char): Int? {
+        val lower = c.toLowerCase()
+        return if (lower in 'a'..'h') {
+            lower - 'a'
+        } else {
+            null
+        }
+    }
 }
