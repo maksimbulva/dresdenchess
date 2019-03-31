@@ -1,9 +1,6 @@
 package ru.maksimbulva.dresdenchess
 
-import ru.maksimbulva.dresdenchess.board.Cell
-import ru.maksimbulva.dresdenchess.board.Cells
-import ru.maksimbulva.dresdenchess.board.Columns
-import ru.maksimbulva.dresdenchess.board.Rows
+import ru.maksimbulva.dresdenchess.board.*
 import ru.maksimbulva.dresdenchess.moves.MovesGenerator
 import ru.maksimbulva.dresdenchess.pieces.Knight
 import ru.maksimbulva.dresdenchess.pieces.WhitePawn
@@ -12,15 +9,15 @@ import java.time.Duration
 
 fun perft(): Long {
     val position = Position(Cells.E1, Cells.E8)
-    position.board.addPiece(Players.WHITE, Knight, Cells.B1)
-    position.board.addPiece(Players.WHITE, Knight, Cells.G1)
+    position.board.addPiece(BoardCell(Players.WHITE, Knight, Cells.B1))
+    position.board.addPiece(BoardCell(Players.WHITE, Knight, Cells.G1))
     for (column in Columns.COLUMN_A..Columns.COLUMN_H) {
-        position.board.addPiece(Players.WHITE, WhitePawn, Cell.encode(Rows.ROW_2, column))
+        position.board.addPiece(BoardCell(Players.WHITE, WhitePawn, Cell.encode(Rows.ROW_2, column)))
     }
     return MovesGenerator.countPossibleMoves(position, 3)
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val durations = mutableListOf<Duration>()
     for (i in 0 until 10) {
         val startTimeMillis = System.currentTimeMillis()

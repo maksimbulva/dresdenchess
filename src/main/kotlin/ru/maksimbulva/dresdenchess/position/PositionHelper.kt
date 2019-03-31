@@ -3,6 +3,7 @@ package ru.maksimbulva.dresdenchess.position
 import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.Players
 import ru.maksimbulva.dresdenchess.board.Board
+import ru.maksimbulva.dresdenchess.board.BoardCell
 import ru.maksimbulva.dresdenchess.pieces.IPiece
 
 object PositionHelper {
@@ -41,6 +42,6 @@ object PositionHelper {
     private fun addPieces(board: Board, player: Players, pieces: List<Pair<Int, IPiece>>) {
         pieces.asSequence()
             .filter { it.second.piece != Pieces.KING }
-            .forEach { (cell, piece) -> board.addPiece(player, piece, cell) }
+            .forEach { (cell, piece) -> board.addPiece(BoardCell(player, piece, cell)) }
     }
 }

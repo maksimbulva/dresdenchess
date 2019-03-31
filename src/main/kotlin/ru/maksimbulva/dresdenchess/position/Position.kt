@@ -3,6 +3,8 @@ package ru.maksimbulva.dresdenchess.position
 import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.Players
 import ru.maksimbulva.dresdenchess.board.Board
+import ru.maksimbulva.dresdenchess.board.BoardCell
+import ru.maksimbulva.dresdenchess.board.BoardUpdateUseCase
 import ru.maksimbulva.dresdenchess.board.Cell
 import ru.maksimbulva.dresdenchess.moves.Move
 import ru.maksimbulva.dresdenchess.other
@@ -10,6 +12,7 @@ import java.util.*
 
 class Position(whiteKingCell: Int, blackKingCell: Int) {
     val board = Board(whiteKingCell, blackKingCell)
+    val boardUpdateUseCase = BoardUpdateUseCase(board)
 
     private val movesPlayed = Stack<MovePlayed>()
 
@@ -71,7 +74,7 @@ class Position(whiteKingCell: Int, blackKingCell: Int) {
                 board.removePieceAt(toCell)
             }
         }
-        board.updatePieceCell(fromCell, toCell)
+        boardUpdateUseCase.move(fromCell, toCell)
 
         val enPassantColumn: Int? = if (
             piece == Pieces.PAWN && Math.abs(fromCell - toCell) == 16
@@ -95,15 +98,15 @@ class Position(whiteKingCell: Int, blackKingCell: Int) {
     private fun undoMove(move: Int) {
         val fromCell = Move.fromCell(move)
         val toCell = Move.destCell(move)
-        board.updatePieceCell(toCell, fromCell)
+        boardUpdateUseCase.move(toCell, fromCell)
         if (Move.isCapture(move)) {
             if (Move.isEnPassantCapture(move)) {
                 val capturedPieceCell = enPassantCaptureCapturedPieceCell(fromCell, toCell)
                 val capturedPiece = Pieces.instance(Pieces.PAWN, playerToMove)
-                board.addPiece(playerToMove, capturedPiece, capturedPieceCell)
+                board.addPiece(BoardCell(playerToMove, capturedPiece, capturedPieceCell))
             } else {
                 val capturedPiece = Pieces.instance(Move.capturedPiece(move), playerToMove)
-                board.addPiece(playerToMove, capturedPiece, toCell)
+                board.addPiece(BoardCell(playerToMove, capturedPiece, toCell))
             }
         }
         flipPlayerToMove()

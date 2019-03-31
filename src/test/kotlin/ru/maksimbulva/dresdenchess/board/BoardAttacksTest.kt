@@ -11,8 +11,8 @@ internal class BoardAttacksTest {
     @Test
     fun kingAndPawnsAttacksTest() {
         val board = Board(Cells.B2, Cells.D2).apply {
-            addPiece(Players.WHITE, WhitePawn, Cells.C3)
-            addPiece(Players.BLACK, BlackPawn, Cells.B3)
+            addPiece(BoardCell(Players.WHITE, WhitePawn, Cells.C3))
+            addPiece(BoardCell(Players.BLACK, BlackPawn, Cells.B3))
         }
 
         checkCellsAttacked(
@@ -55,8 +55,8 @@ internal class BoardAttacksTest {
     @Test
     fun knightAttackTest() {
         val board = Board(Cells.A1, Cells.H8).apply {
-            addPiece(Players.WHITE, Knight, Cells.F3)
-            addPiece(Players.BLACK, Knight, Cells.A8)
+            addPiece(BoardCell(Players.WHITE, Knight, Cells.F3))
+            addPiece(BoardCell(Players.BLACK, Knight, Cells.A8))
         }
 
         checkCellsAttacked(
@@ -95,7 +95,7 @@ internal class BoardAttacksTest {
     @Test
     fun bishopAttackTest() {
         val board = Board(Cells.A1, Cells.H8).apply {
-            addPiece(Players.WHITE, Bishop, Cells.F3)
+            addPiece(BoardCell(Players.WHITE, Bishop, Cells.F3))
         }
 
         checkCellsAttacked(
@@ -135,7 +135,7 @@ internal class BoardAttacksTest {
     @Test
     fun rookAttackTest() {
         val board = Board(Cells.A1, Cells.H8).apply {
-            addPiece(Players.BLACK, Rook, Cells.F3)
+            addPiece(BoardCell(Players.BLACK, Rook, Cells.F3))
         }
 
         checkCellsAttacked(

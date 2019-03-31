@@ -1,16 +1,10 @@
 package ru.maksimbulva.dresdenchess.collections
 
-import ru.maksimbulva.dresdenchess.Players
-import ru.maksimbulva.dresdenchess.board.Cell
-import ru.maksimbulva.dresdenchess.pieces.IPiece
-
-class PiecesLinkedList : Iterable<PiecesLinkedList.Node> {
-    class Node(
-        var player: Players,
-        var piece: IPiece,
-        var cell: Int,
-        var prev: Node?,
-        var next: Node?
+class PiecesLinkedList<T>(headData: T) {
+    class Node<T>(
+        var data: T,
+        var prev: Node<T>? = null,
+        var next: Node<T>? = null
     ) {
         fun removeFromList() {
             prev?.let { it.next = next }
@@ -19,40 +13,32 @@ class PiecesLinkedList : Iterable<PiecesLinkedList.Node> {
             next = null
         }
 
-        override fun toString(): String {
-            return "$player ${piece.javaClass} at ${Cell.toString(cell)}"
+        fun insertAfter(prevNode: Node<T>) {
+            require(prev == null && next == null)
+            prev = prevNode
+            next = prevNode.next
+            next?.prev = this
+            prevNode.next = this
         }
     }
 
-    class Iterator(private var nextNode: Node?) : kotlin.collections.Iterator<Node> {
+    class Iterator<T>(private var nextNode: Node<T>?) : kotlin.collections.Iterator<T> {
         override operator fun hasNext() = nextNode != null
 
-        override operator fun next(): Node {
-            val result = nextNode
+        override operator fun next(): T {
+            val result = nextNode ?: throw NoSuchElementException()
             nextNode = nextNode?.next
-            if (result == null) {
-                throw IllegalStateException()
-            }
-            return result
+            return result.data
         }
     }
 
-    var head: Node? = null
+    val head = Node(headData)
 
-    override operator fun iterator() = Iterator(head)
+    val elements = Sequence{ Iterator(head) }
 
-    fun add(player: Players, piece: IPiece, cell: Int): Node {
-        val head = head
-        return if (head == null) {
-            val result = Node(player, piece, cell, prev = null, next = null)
-            this.head = result
-            result
-        } else {
-            val secondNode = head.next
-            val result = Node(player, piece, cell, prev = head, next = secondNode)
-            head.next = result
-            secondNode?.let { it.prev = result }
-            result
+    fun add(data: T): Node<T> {
+        return Node(data).apply {
+            insertAfter(head)
         }
     }
 }

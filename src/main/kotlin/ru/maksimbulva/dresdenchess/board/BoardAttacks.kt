@@ -7,7 +7,7 @@ fun Board.isCellAttacked(targetCell: Int, attacker: Players): Boolean {
     val directionsToCheck = BooleanArray(size = 8)
 
     val attackerPieces = pieces(attacker)
-    val isAttacked = attackerPieces.any { pieceNode ->
+    val isAttacked = attackerPieces.elements.any { pieceNode ->
         val vec = Vector2d.fromCells(targetCell, pieceNode.cell)
         val piece = pieceNode.piece.piece
 

@@ -40,7 +40,7 @@ object MovesGenerator {
 
         val board = position.board
         val pieces = board.pieces(position.playerToMove)
-        pieces.forEach {
+        pieces.elements.forEach {
             it.piece.generateSemiLegalMoves(position, it.cell, moves)
         }
         return moves
