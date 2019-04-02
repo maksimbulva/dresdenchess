@@ -2,10 +2,7 @@ package ru.maksimbulva.dresdenchess.position
 
 import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.Players
-import ru.maksimbulva.dresdenchess.board.Board
-import ru.maksimbulva.dresdenchess.board.Cell
-import ru.maksimbulva.dresdenchess.board.Columns
-import ru.maksimbulva.dresdenchess.board.Rows
+import ru.maksimbulva.dresdenchess.board.*
 import ru.maksimbulva.dresdenchess.exceptions.InvalidPositionEncodingException
 import ru.maksimbulva.dresdenchess.pieces.BlackPawn
 import ru.maksimbulva.dresdenchess.pieces.IPiece
@@ -45,7 +42,7 @@ object Fen {
         return sb.toString()
     }
 
-    fun decode(encoded: String): Position? {
+    fun decode(encoded: String): Position {
         try {
             val splited = encoded.split(ROWS_SEPARATOR, ' ', '\t')
             val pieces = decodePieces(splited)
@@ -192,20 +189,21 @@ object Fen {
         }
     }
 
-    private fun decodePieces(splited: List<String>): List<EncodedPiece> {
+    private fun decodePieces(splited: List<String>): List<BoardCell> {
         require(splited.size >= 8)
-        val result = mutableListOf<EncodedPiece>()
-        splited.take(8).forEachIndexed { index, s ->
+        val result = mutableListOf<BoardCell>()
+        splited.asSequence().take(8).forEachIndexed { index, s ->
             var column = Columns.COLUMN_A
             s.forEach {
                 require(column in Columns.COLUMN_A..Columns.COLUMN_H)
                 if (it.isDigit()) {
-                    column = it - '0'
+                    column += it - '0'
                 } else {
                     val (player, piece) = charToPlayerAndPiece(it)
                     val row = Rows.ROW_8 - index
                     val cell = Cell.encode(row, column)
-                    result.add(EncodedPiece(player, Pieces.instance(piece, player), cell))
+                    result.add(BoardCell(player, Pieces.instance(piece, player), cell))
+                    ++column
                 }
             }
         }
@@ -310,6 +308,4 @@ object Fen {
             else -> throw InvalidPositionEncodingException()
         }
     }
-
-    private data class EncodedPiece(val player: Players, val piece: IPiece, val cell: Int)
 }

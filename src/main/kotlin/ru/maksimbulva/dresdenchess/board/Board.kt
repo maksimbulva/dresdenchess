@@ -53,4 +53,20 @@ class Board(
         cells[oldCell] = null
         cells[newData.cell] = node
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other === null) return false
+        if (this::class.java != other::class.java) return false
+
+        other as Board
+        return cells.asSequence().zip(other.cells.asSequence())
+            .all {
+                if (it.first === null && it.second === null) return true
+                if (it.first === null || it.second === null) return false
+                return it.first?.data == it.second?.data
+            }
+    }
+
+    override fun hashCode() = cells.hashCode()
 }

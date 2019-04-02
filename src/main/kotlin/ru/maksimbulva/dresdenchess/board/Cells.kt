@@ -66,7 +66,6 @@ object Cells {
     const val G8 = 62
     const val H8 = 63
 
-
     fun ofRow(row: Int) = IntRange(Cell.encode(row, Columns.COLUMN_A), Cell.encode(row, Columns.COLUMN_H))
 
     fun ofColumn(column: Int) = (Rows.ROW_1..Rows.ROW_8).map { Cell.encode(it, column) }.toList()
