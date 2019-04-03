@@ -2,11 +2,16 @@ package ru.maksimbulva.dresdenchess.position
 
 import ru.maksimbulva.dresdenchess.Pieces
 import ru.maksimbulva.dresdenchess.Players
-import ru.maksimbulva.dresdenchess.board.*
+import ru.maksimbulva.dresdenchess.board.BoardCell
+import ru.maksimbulva.dresdenchess.board.Cell
+import ru.maksimbulva.dresdenchess.board.Columns
+import ru.maksimbulva.dresdenchess.board.Rows
 import ru.maksimbulva.dresdenchess.exceptions.InvalidPositionEncodingException
-import ru.maksimbulva.dresdenchess.pieces.BlackPawn
 import ru.maksimbulva.dresdenchess.pieces.IPiece
-import ru.maksimbulva.dresdenchess.pieces.WhitePawn
+import ru.maksimbulva.dresdenchess.position.fen.decoding.BoardDecoder
+import ru.maksimbulva.dresdenchess.position.fen.decoding.EnPassantCaptureAvailabilityDecoder
+import ru.maksimbulva.dresdenchess.position.fen.decoding.PlayerToMoveDecoder
+import ru.maksimbulva.dresdenchess.position.fen.encoding.*
 
 /**
  * Provides methods for encoding and decoding chess positions stored in Forsyth–Edwards notation
@@ -22,49 +27,45 @@ object Fen {
         SetCounterToZero
     }
 
-    private const val ROWS_SEPARATOR = '/'
-    private const val FEN_NO_ONE_CAN_CASTLE = '-'
-    private const val FEN_WHITE_CAN_CASTLE_SHORT = 'K'
-    private const val FEN_WHITE_CAN_CASTLE_LONG = 'Q'
-    private const val FEN_BLACK_CAN_CASTLE_SHORT = 'k'
-    private const val FEN_BLACK_CAN_CASTLE_LONG = 'q'
-    private const val FEN_CANNOT_CAPTURE_EN_PASSANT = '-'
+    const val WhiteToMove = "w"
+    const val BlackToMove = "b"
+
+    const val ROWS_SEPARATOR = '/'
+    const val FEN_NO_ONE_CAN_CASTLE = '-'
+    const val FEN_WHITE_CAN_CASTLE_SHORT = 'K'
+    const val FEN_WHITE_CAN_CASTLE_LONG = 'Q'
+    const val FEN_BLACK_CAN_CASTLE_SHORT = 'k'
+    const val FEN_BLACK_CAN_CASTLE_LONG = 'q'
+    const val CannotCaptureEnPassant = "-"
 
     const val InitialPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
     fun encode(position: Position, moveCounterEncoding: MoveCounterEncoding): String {
-        val sb = StringBuilder(80)
-        encodeBoard(sb, position.board)
-        encodePlayerToMove(sb, position.playerToMove)
-        encodeCastlingAvailability(sb, position)
-        encodeEnPassantCaptureAvailability(sb, position)
-        encodeMoveCounter(sb, position, moveCounterEncoding)
-        return sb.toString()
+        return arrayOf(
+            BoardEncoder,
+            PlayerToMoveEncoder,
+            CastlingAvailabilityEncoder,
+            EnPassantCaptureAvailabilityEncoder,
+            HalfmoveClockEncoder,
+            FullmoveCounterEncoder(moveCounterEncoding)
+        )
+            .map { it.encode(position) }
+            .joinToString(separator = " ")
     }
 
     fun decode(encoded: String): Position {
         try {
-            val splited = encoded.split(ROWS_SEPARATOR, ' ', '\t')
-            val pieces = decodePieces(splited)
-
-            val whitePieces = pieces.asSequence()
-                .filter { it.player == Players.WHITE }
-                .map { it.cell to it.piece }
-
-            val blackPieces = pieces.asSequence()
-                .filter { it.player == Players.BLACK }
-                .map { it.cell to it.piece }
-
-            val playerToMove = decodePlayerToMove(splited[8])
-            val castlingFlags = splited[9]
-            val enPassantCaptureColumn = decodeEnPassantCaptureColumn(splited[10])
+            val splited = encoded.split(' ', '\t')
+            val board = BoardDecoder.decode(splited.first())
+            val playerToMove = PlayerToMoveDecoder.decode(splited[1])
+            val castlingFlags = splited[2]
+            val enPassantCaptureColumn = EnPassantCaptureAvailabilityDecoder.decode(splited[3])
             // TODO: These guys are not so critical, forgive possible mistakes
-            val halfmoveClock = splited[11].toInt()
-            val fullmoveCounter = splited[12].toInt()
+            val halfmoveClock = splited[4].toInt()
+            val fullmoveCounter = splited[5].toInt()
             // TODO
             return PositionHelper.create(
-                white = whitePieces.toList(),
-                black = blackPieces.toList(),
+                board = board,
                 playerToMove = playerToMove,
                 isWhiteCanCastleShort = FEN_WHITE_CAN_CASTLE_SHORT in castlingFlags,
                 isWhiteCanCastleLong = FEN_WHITE_CAN_CASTLE_LONG in castlingFlags,
@@ -165,147 +166,8 @@ object Fen {
 }
      */
 
-    private fun encodeBoard(sb: StringBuilder, board: Board) {
-        for (row in Rows.ROW_8 downTo Rows.ROW_1) {
-            var emptyCellsCounter = 0
-            for (column in Columns.COLUMN_A..Columns.COLUMN_H) {
-                val node = board.lookupCell(Cell.encode(row, column))
-                if (node != null) {
-                    if (emptyCellsCounter != 0) {
-                        sb.append(emptyCellsCounter)
-                        emptyCellsCounter = 0
-                    }
-                    sb.append(pieceToChar(node.player, node.piece))
-                } else {
-                    ++emptyCellsCounter
-                }
-            }
-            if (emptyCellsCounter != 0) {
-                sb.append(emptyCellsCounter)
-            }
-            if (row != Rows.ROW_1) {
-                sb.append(ROWS_SEPARATOR)
-            }
-        }
-    }
-
-    private fun decodePieces(splited: List<String>): List<BoardCell> {
-        require(splited.size >= 8)
-        val result = mutableListOf<BoardCell>()
-        splited.asSequence().take(8).forEachIndexed { index, s ->
-            var column = Columns.COLUMN_A
-            s.forEach {
-                require(column in Columns.COLUMN_A..Columns.COLUMN_H)
-                if (it.isDigit()) {
-                    column += it - '0'
-                } else {
-                    val (player, piece) = charToPlayerAndPiece(it)
-                    val row = Rows.ROW_8 - index
-                    val cell = Cell.encode(row, column)
-                    result.add(BoardCell(player, Pieces.instance(piece, player), cell))
-                    ++column
-                }
-            }
-        }
-        return result
-    }
-
-    private fun encodePlayerToMove(sb: StringBuilder, player: Players) {
-        sb.append(' ')
-        sb.append(if (player == Players.WHITE) 'w' else 'b')
-    }
-
-    private fun decodePlayerToMove(encoded: String): Players {
-        // Excuse case mismatch
-        return when (encoded.firstOrNull()) {
-            'w' -> Players.WHITE
-            'b' -> Players.BLACK
-            else -> throw InvalidPositionEncodingException()
-        }
-    }
-
-    private fun encodeCastlingAvailability(sb: StringBuilder, position: Position) {
-        sb.append(' ')
-        val availableCastlings = listOf(
-            position.isWhiteCanCastleShort to FEN_WHITE_CAN_CASTLE_SHORT,
-            position.isWhiteCanCastleLong to FEN_WHITE_CAN_CASTLE_LONG,
-            position.isBlackCanCastleShort to FEN_BLACK_CAN_CASTLE_SHORT,
-            position.isBlackCanCastleLong to FEN_BLACK_CAN_CASTLE_LONG
-        )
-            .filter { it.first }
-
-        if (availableCastlings.isEmpty()) {
-            sb.append(FEN_NO_ONE_CAN_CASTLE)
-        } else {
-            availableCastlings.forEach { sb.append(it.second) }
-        }
-    }
-
-    private fun encodeEnPassantCaptureAvailability(sb: StringBuilder, position: Position) {
-        val flags = position.flags
-        sb.append(' ')
-        if (PositionFlags.isCanCaptureEnPassant(flags)) {
-            val row = if (position.playerToMove == Players.WHITE) {
-                WhitePawn.enPassantCaptureRow
-            } else {
-                BlackPawn.enPassantCaptureRow
-            }
-            sb.append(Cell.toString(Cell.encode(row, PositionFlags.enPassantColumn(flags))))
-        } else {
-            sb.append(FEN_CANNOT_CAPTURE_EN_PASSANT)
-        }
-    }
-
     private fun decodeEnPassantCaptureColumn(encoded: String): Int? {
         val cell = Cell.fromStringOrNull(encoded) ?: return null
         return Cell.row(cell)
-    }
-
-    private fun encodeMoveCounter(
-        sb: StringBuilder,
-        position: Position,
-        moveCounterEncoding: MoveCounterEncoding
-    ) {
-        val fullmoveCounter = if (moveCounterEncoding == MoveCounterEncoding.UseActualValue) {
-            position.fullmoveCounter
-        } else {
-            1
-        }
-        sb.append(' ').append(position.halfmoveClock).append(' ').append(fullmoveCounter)
-    }
-
-    private fun pieceToChar(player: Players, piece: IPiece): Char {
-        val char = when (piece.piece) {
-            Pieces.PAWN -> 'p'
-            Pieces.KNIGHT -> 'n'
-            Pieces.BISHOP -> 'b'
-            Pieces.ROOK -> 'r'
-            Pieces.QUEEN -> 'q'
-            Pieces.KING -> 'k'
-            else -> throw IllegalStateException()
-        }
-        return if (player == Players.WHITE) {
-            char.toUpperCase()
-        } else {
-            char
-        }
-    }
-
-    private fun charToPlayerAndPiece(c: Char): Pair<Players, Int>
-    {
-        val player = if (c.isUpperCase()) {
-            Players.WHITE
-        } else {
-            Players.BLACK
-        }
-        return player to when (c.toLowerCase()) {
-            'p' -> Pieces.PAWN
-            'n' -> Pieces.KNIGHT
-            'b' -> Pieces.BISHOP
-            'r' -> Pieces.ROOK
-            'q' -> Pieces.QUEEN
-            'k' -> Pieces.KING
-            else -> throw InvalidPositionEncodingException()
-        }
     }
 }

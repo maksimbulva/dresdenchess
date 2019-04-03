@@ -10,8 +10,10 @@ import ru.maksimbulva.dresdenchess.moves.Move
 import ru.maksimbulva.dresdenchess.other
 import java.util.*
 
-class Position(whiteKingCell: Int, blackKingCell: Int) {
-    val board = Board(whiteKingCell, blackKingCell)
+class Position(val board: Board) {
+
+    constructor(whiteKingCell: Int, blackKingCell: Int): this(Board(whiteKingCell, blackKingCell))
+
     val boardUpdateUseCase = BoardUpdateUseCase(board)
 
     private val movesPlayed = Stack<MovePlayed>()

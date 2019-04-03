@@ -10,6 +10,8 @@ object Columns {
     const val COLUMN_G = 6
     const val COLUMN_H = 7
 
+    val all = COLUMN_A..COLUMN_H
+
     fun toChar(column: Int) = 'a' + column
 
     fun fromChar(c: Char): Int? {
